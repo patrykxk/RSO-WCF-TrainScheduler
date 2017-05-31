@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using WcfServiceLibrary1;
 
 namespace TrainScheduleClient
 {
@@ -10,15 +7,19 @@ namespace TrainScheduleClient
     {
         static void Main(string[] args)
         {
-            TrainScheduleService.ScheduleService proxy = new TrainScheduleService.ScheduleService();
+            var proxy = new ScheduleService();
 
-            
             proxy.GetData();
-            var list = proxy.GetTrainsByStartingCity("A");
-            foreach(string s in list)
+            //var list = proxy.GetTrainsByStartingCity("A");
+            var list = proxy.GetTrainsFromTo("A", "B", new DateTime(2017,05,10,8,0,0), new DateTime(2017, 05, 11, 8, 0,0));
+            
+            foreach(var s in list)
             {
                 Console.WriteLine(s);
             }
+
+
+
             Console.ReadKey();
         }
     }

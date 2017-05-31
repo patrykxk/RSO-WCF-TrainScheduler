@@ -1,13 +1,14 @@
 ﻿using System;
 
-namespace WcfServiceLibrary1
+namespace WcfServiceLibrary1.model
 {
-    class Schedule
+    public class Schedule
     {
-        String startingCity;
-        String endCity;
-        DateTime departureTime;
-        DateTime arrivalTime;
+        public string StartingCity { get; set; }
+        public string EndCity { get; set; }
+        public DateTime DepartureTime { get; set; }
+        public DateTime ArrivalTime { get; set; }
+
 
         public Schedule(string startingCity, string endCity, DateTime departureTime, DateTime arrivalTime)
         {
@@ -16,10 +17,5 @@ namespace WcfServiceLibrary1
             this.DepartureTime = departureTime;
             this.ArrivalTime = arrivalTime;
         }
-
-        public string StartingCity { get => startingCity; set => startingCity = value; }
-        public string EndCity { get => endCity; set => endCity = value; }
-        public DateTime DepartureTime { get => departureTime; set => departureTime = value; }
-        public DateTime ArrivalTime { get => arrivalTime; set => arrivalTime = value; }
     }
 }
