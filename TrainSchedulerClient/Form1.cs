@@ -50,6 +50,7 @@ namespace TrainSchedulerClient
             {
                 DateTime from = fromDatePicker.Value + fromTimePicker.Value.TimeOfDay;
                 DateTime to = toDatePicker.Value + toTimePicker.Value.TimeOfDay;
+                
                 try
                 {
                     var list = proxy.GetTrainsFromTo(startingCity, endCity, from, to);
