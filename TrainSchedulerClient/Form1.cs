@@ -8,11 +8,26 @@ namespace TrainSchedulerClient
 {
     public partial class Form1 : Form
     {
-        private ScheduleService proxy = new ScheduleService();
+        private ScheduleService proxy;
         public Form1()
         {
+            try
+            {
+                proxy = new ScheduleService();
+            }
+            catch (CommunicationException)
+            {
+                ShowMessageBox("No connection to service", "Connection error");
+            }
+
             InitializeComponent();
-            proxy.GetData();
+            try
+            {
+                proxy.GetData();
+            }catch (EndpointNotFoundException)
+            {
+                ShowMessageBox("Connection to service lost", "Connection error");
+            }
         }
 
         private void submit_Click(object sender, EventArgs e)
@@ -35,7 +50,6 @@ namespace TrainSchedulerClient
             {
                 DateTime from = fromDatePicker.Value + fromTimePicker.Value.TimeOfDay;
                 DateTime to = toDatePicker.Value + toTimePicker.Value.TimeOfDay;
-                //List<List<string>> list = new List<List<string>>();
                 try
                 {
                     var list = proxy.GetTrainsFromTo(startingCity, endCity, from, to);
@@ -44,6 +58,10 @@ namespace TrainSchedulerClient
                 catch (FaultException ex)
                 {
                     ShowMessageBox(ex.Message, "City not found");
+                }
+                catch (EndpointNotFoundException)
+                {
+                    ShowMessageBox("Connection to service lost", "Connection error");
                 }
             }
         }
