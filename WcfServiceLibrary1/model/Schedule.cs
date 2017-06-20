@@ -17,5 +17,9 @@ namespace WcfServiceLibrary1.model
             this.DepartureTime = departureTime;
             this.ArrivalTime = arrivalTime;
         }
+
+        public Schedule()
+        {
+        }
     }
 }

@@ -38,22 +38,6 @@ namespace WcfServiceLibrary1
             return string.Format("Readed: " + trains.Count);
         }
 
-        public List<string> GetTrainsByStartingCity(string startingCity)
-        {
-            List<String> foundTrains = new List<string>();
-
-            foreach (Schedule train in trains)
-            {
-                if (train.StartingCity.Equals(startingCity))
-                {
-                    String trainString = train.StartingCity + "," + train.DepartureTime + "," + train.EndCity + "," +
-                                         train.ArrivalTime;
-                    foundTrains.Add(trainString);
-                }
-            }
-
-            return foundTrains;
-        }
 
         public List<string> GetTrainsFromTo(string startingCity, string endCity)
         {
@@ -73,10 +57,13 @@ namespace WcfServiceLibrary1
         }
 
 
-        public List<string> GetTrainsFromTo(string startingCity, string endCity, DateTime startTimeInterval,
-            DateTime endTimeInterval)
+        public List<List<string>> GetTrainsFromTo(string startingCity, string endCity,
+            DateTime startTime, DateTime endTime)
         {
-            var foundTrains = new List<string>();
+            var indirectTrains = new List<string>();
+            var foundTrains = new List<List<string>>();
+            var directTrains = new List<string>();
+
             bool isStartingCityFound = false;
             bool isEndCityFound = false;
 
@@ -94,25 +81,72 @@ namespace WcfServiceLibrary1
 
             if (!isStartingCityFound)
             {
-                foundTrains.Add("Starting city: " + startingCity + " not found");
+                directTrains.Add("Starting city: " + startingCity + " not found");
             }
             if (!isEndCityFound)
             {
-                foundTrains.Add("End city: " + endCity + " not found");
+                directTrains.Add("End city: " + endCity + " not found");
             }
-            if (!isEndCityFound || !isStartingCityFound) return foundTrains;
+            if (isEndCityFound || isStartingCityFound)
+            {
+                directTrains.AddRange(FindDirectTrains(startingCity, endCity, startTime, endTime));
+                indirectTrains.AddRange(FindIndirectTrains(startingCity, endCity, startTime, endTime));
+            }
+            foundTrains.Add(directTrains);
+            foundTrains.Add(indirectTrains);
+            return foundTrains;
+        }
 
+        private List<string> FindDirectTrains(string startingCity, string endCity, DateTime startTime, DateTime endTime)
+        {
+            var directTrains = new List<string>();
             foreach (Schedule train in trains)
             {
                 if (train.StartingCity.Equals(startingCity) && train.EndCity.Equals(endCity) &&
-                    train.DepartureTime >= startTimeInterval && train.DepartureTime <= endTimeInterval)
+                    train.DepartureTime >= startTime && train.ArrivalTime <= endTime)
                 {
                     string trainString = train.StartingCity + "," + train.DepartureTime + "," + train.EndCity +
                                          "," + train.ArrivalTime;
-                    foundTrains.Add(trainString);
+                    directTrains.Add(trainString);
                 }
             }
-            return foundTrains;
+            return directTrains;
+        }
+
+        private List<string> FindIndirectTrains(string startingCity, string endCity, DateTime startTime, DateTime endTime)
+        {
+            var indirectTrains = new List<string>();
+            var tempList = new List<string>();
+            Schedule prevCity = new Schedule();
+            foreach (Schedule train in trains)
+            {
+                if (train.StartingCity.Equals(startingCity) && train.DepartureTime >= startTime)
+                {
+                    tempList.Add(train.StartingCity + "," + train.DepartureTime + "," + train.EndCity +
+                                 "," + train.ArrivalTime);
+                    prevCity = train;
+                    foreach (Schedule innerTrain in trains)
+                    {
+                        if (innerTrain.StartingCity.Equals(prevCity.EndCity) && innerTrain.ArrivalTime <= endTime &&
+                            innerTrain.DepartureTime > prevCity.ArrivalTime)
+                        {
+                            tempList.Add(innerTrain.StartingCity + "," + innerTrain.DepartureTime + "," + innerTrain.EndCity +
+                                         "," + innerTrain.ArrivalTime);
+                            if (innerTrain.EndCity.Equals(endCity))
+                            {
+                                indirectTrains.AddRange(tempList);
+                                indirectTrains.Add(System.Environment.NewLine);
+                                break;
+                            }
+                            prevCity = innerTrain;
+                        }
+                        
+                    }
+                }
+                tempList = new List<string>();
+            }
+
+            return indirectTrains;
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ServiceModel;
-using WcfServiceLibrary1;
 
 namespace TrainScheduleService
 {
@@ -9,8 +9,8 @@ namespace TrainScheduleService
     {
         [OperationContract]
         string GetData();
-        List<string> GetTrainsByStartingCity(string startingCity);
-
-
+        [OperationContract]
+        List<List<string>> GetTrainsFromTo(string startingCity, string endCity,
+            DateTime startTime, DateTime endTime);
     }
 }

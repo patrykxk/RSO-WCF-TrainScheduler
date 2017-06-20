@@ -18,8 +18,6 @@ namespace TrainScheduleClient
                 Console.WriteLine(s);
             }
 
-
-
             Console.ReadKey();
         }
     }
