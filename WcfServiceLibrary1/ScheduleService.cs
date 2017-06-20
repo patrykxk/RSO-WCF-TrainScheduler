@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.ServiceModel;
 using TrainScheduleService;
 using WcfServiceLibrary1.model;
 
@@ -9,7 +10,6 @@ namespace WcfServiceLibrary1
     public class ScheduleService : IScheduleService
     {
         List<Schedule> trains = new List<Schedule>();
-
 
         public string GetData()
         {
@@ -39,24 +39,7 @@ namespace WcfServiceLibrary1
         }
 
 
-        public List<string> GetTrainsFromTo(string startingCity, string endCity)
-        {
-            List<String> foundTrains = new List<string>();
-
-            foreach (Schedule train in trains)
-            {
-                if (train.StartingCity.Equals(startingCity) && train.EndCity.Equals(endCity))
-                {
-                    String trainString = train.StartingCity + "," + train.DepartureTime + "," + train.EndCity + "," +
-                                         train.ArrivalTime;
-                    foundTrains.Add(trainString);
-                }
-            }
-
-            return foundTrains;
-        }
-
-
+        [FaultContract(typeof(FaultException))]
         public List<List<string>> GetTrainsFromTo(string startingCity, string endCity,
             DateTime startTime, DateTime endTime)
         {
@@ -64,6 +47,18 @@ namespace WcfServiceLibrary1
             var foundTrains = new List<List<string>>();
             var directTrains = new List<string>();
 
+            CheckIfStartingCityAndEndCityExist(startingCity, endCity);
+
+            directTrains.AddRange(FindDirectTrains(startingCity, endCity, startTime, endTime));
+            indirectTrains.AddRange(FindIndirectTrains(startingCity, endCity, startTime, endTime));
+            
+            foundTrains.Add(directTrains);
+            foundTrains.Add(indirectTrains);
+            return foundTrains;
+        }
+
+        private void CheckIfStartingCityAndEndCityExist(string startingCity, string endCity)
+        {
             bool isStartingCityFound = false;
             bool isEndCityFound = false;
 
@@ -81,20 +76,12 @@ namespace WcfServiceLibrary1
 
             if (!isStartingCityFound)
             {
-                directTrains.Add("Starting city: " + startingCity + " not found");
+                throw new FaultException("Starting city: " + startingCity + " not found");
             }
             if (!isEndCityFound)
             {
-                directTrains.Add("End city: " + endCity + " not found");
+                throw new FaultException("End city: " + endCity + " not found");
             }
-            if (isEndCityFound || isStartingCityFound)
-            {
-                directTrains.AddRange(FindDirectTrains(startingCity, endCity, startTime, endTime));
-                indirectTrains.AddRange(FindIndirectTrains(startingCity, endCity, startTime, endTime));
-            }
-            foundTrains.Add(directTrains);
-            foundTrains.Add(indirectTrains);
-            return foundTrains;
         }
 
         private List<string> FindDirectTrains(string startingCity, string endCity, DateTime startTime, DateTime endTime)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ServiceModel;
 using System.Windows.Forms;
 using WcfServiceLibrary1;
 
@@ -34,9 +35,16 @@ namespace TrainSchedulerClient
             {
                 DateTime from = fromDatePicker.Value + fromTimePicker.Value.TimeOfDay;
                 DateTime to = toDatePicker.Value + toTimePicker.Value.TimeOfDay;
-               
-                var list = proxy.GetTrainsFromTo(startingCity, endCity, from, to);
-                ShowTrainsInTextsAreas(list);
+                //List<List<string>> list = new List<List<string>>();
+                try
+                {
+                    var list = proxy.GetTrainsFromTo(startingCity, endCity, from, to);
+                    ShowTrainsInTextsAreas(list);
+                }
+                catch (FaultException ex)
+                {
+                    ShowMessageBox(ex.Message, "City not found");
+                }
             }
         }
 
